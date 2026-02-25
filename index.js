@@ -1,51 +1,39 @@
-// require("dotenv").config();
+const dotenv = require("dotenv");
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
-const { dbConnect } = require("./config/config");
-const userRoute = require("./routes/routes.js");
+const contactRoutes = require("./routes/routes");
+
+dotenv.config();
 
 const app = express();
-const port = 3500;
 
-// Middleware
+// Parse JSON
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Serve static files
-app.use(express.static(path.join(__dirname, "public")));
-
-dbConnect();
-
-// Allowed origins
 const allowedOrigins = [
-  "https://test.bouncyboxstudio.in",
+  "http://localhost:3000",
   "http://localhost:5173",
-  "https://plumeriaresort.in",
 ];
 
-// CORS Setup
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow requests with no origin (like Postman or curl)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) === -1) {
-        const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
-        return callback(new Error(msg), false);
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log("CORS error: origin not allowed", origin);
+        callback(new Error("Not allowed by CORS"));
       }
-      return callback(null, true);
     },
     credentials: true,
   })
 );
 
-app.use("/", userRoute);
+// Routes
+app.use("/api", contactRoutes);
 
-app.get("/", (req, res) => {
-  res.send("Hello from server");
-});
+const PORT = process.env.PORT
 
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

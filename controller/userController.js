@@ -1,155 +1,47 @@
-const Contact = require("../Models/Contact");
+const nodemailer = require("nodemailer");
 
-// Save contact form data
-const UserData = async (req, res) => {
+const sendContactMail = async (req, res) => {
+  console.log("Received contact form submission:", req.body);
   try {
-    const { name, phone, email, message } = req.body;
-    console.log(req.body, "request object");
+    const { fullName, email, phone,course,message,platform } = req.body;
 
-    // Validate required fields
-    if (!name || !phone || !email || !message) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required",
-      });
+    if (!fullName || !email || !phone) {
+      return res.status(400).json({ message: "All required fields must be filled" });
     }
-    const ifExisting = await Contact.findOne({ $or: [{email},{phone}]})
 
-    if (ifExisting){
-      return res.status(400).json({
-        message :"Email or Phone Number already exists!"
-      })
-    }
-    // Save to database
-    const newContact = new Contact({
-      name,
-      phone,
-      email,
-      message,
+    // Create transporter
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER, // your gmail
+        pass: process.env.EMAIL_PASS, // app password
+      },
     });
-     
-    await newContact.save();
 
-    return res.status(201).json({
-      success: true,
-      message: "Contact details saved successfully",
-      data: newContact,
-    });
+    // Mail options
+    const mailOptions = {
+      from: email,
+      to: process.env.EMAIL_USER,
+      subject: `New Contact Form Submission from ${fullName}`,
+      html: `
+        <h2>Contact Form Details</h2>
+        <p><strong>Name:</strong> ${fullName}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Phone:</strong> ${phone || "Not Provided"}</p>
+       <p><strong>Course:</strong> ${course || "Not Provided"}</p>
+        <p><strong>Message:</strong> ${message}</p>
+        <p><strong>Platform:</strong> ${platform || "Not Provided"}</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: "Message sent successfully!" });
+
   } catch (error) {
-    console.error("Error saving contact:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Server error while saving contact details",
-      error: error.message,
-    });
+    console.error(error);
+    res.status(500).json({ message: "Failed to send message" });
   }
 };
 
-const fetchUsers = async (req, res) => {
-  try {
-    const getUsers = await Contact.find();
-    console.log("getUsers", getUsers);
-    res.status(200).json({
-      success: true,
-      data: getUsers,
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Error fetching users",
-      error: err.message,
-    });
-  }
-};
-
-
-const editUsers = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    if (!id) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid user id",
-      });
-    }
-
-    const { name, phone, email, message } = req.body;
-
-    if (!name && !phone && !email && !message) {
-      return res.status(400).json({
-        success: false,
-        message: "No data provided to update",
-      });
-    }
-
-    const updateData = {};
-    if (name) updateData.name = name;
-    if (phone) updateData.phone = phone;
-    if (email) updateData.email = email;
-    if (message) updateData.message = message;
-
-    const updatedUser = await Contact.findByIdAndUpdate(
-      id,
-      updateData,
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
-
-    if (!updatedUser) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "User updated successfully",
-      data: updatedUser,
-    });
-  } catch (err) {
-    console.error("Edit user error:", err);
-    return res.status(500).json({
-      success: false,
-      message: "Server failure",
-    });
-  }
-};
-
-const deleteUsers = async (req, res) =>{
-  try{
-    const { id }= req.params
-    
-    if(!id){
-      return res.status(400).json({success:false,message:"Invalid user ID"})
-    }
-    const deletedUser=await Contact.findByIdAndDelete(id)
-    if(!deletedUser){
-      return res.status(400).json({
-        success:false,
-        message:"User Not Found",
-      })
-    }
-    return res.status(200).json({
-      success:true,
-      message:"User Deleted Successfully",
-    })
-  }catch(e){
-      console.error(`Delete User Error: ${e}`)
-      return res.status(500).json({
-        success:false,
-        message:"Server error while deleting user",
-        error: e.message,
-      })
-  }
-}
-module.exports = {
-  UserData,
-  fetchUsers,
-  editUsers,
-  deleteUsers,
-};
+module.exports = { sendContactMail };
