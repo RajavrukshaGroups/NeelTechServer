@@ -11,8 +11,9 @@ const app = express();
 app.use(express.json());
 
 const allowedOrigins = [
-  "http://localhost:3000",
-  "http://localhost:5173",
+  // "http://localhost:3000",
+  // "http://localhost:5173",
+  "https://www.neeltechnologies.com/",
 ];
 
 app.use(
@@ -26,13 +27,13 @@ app.use(
       }
     },
     credentials: true,
-  })
+  }),
 );
 
 // Routes
 app.use("/api", contactRoutes);
 
-const PORT = process.env.PORT
+const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
