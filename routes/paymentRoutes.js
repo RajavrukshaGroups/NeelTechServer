@@ -124,8 +124,8 @@ router.post("/create-payment", async (req, res) => {
       "https://api.phonepe.com/apis/pg/checkout/v2/pay", // ✅ LIVE
       {
         merchantOrderId,
-        amount: 3900,
-        // amount: 100,
+        // amount: 3900,
+        amount: 100,
         expireAfter: 1200,
         metaInfo: {
           udf1: "demo",
