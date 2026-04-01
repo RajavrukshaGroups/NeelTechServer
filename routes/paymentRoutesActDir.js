@@ -50,7 +50,8 @@ router.post("/create-payment", async (req, res) => {
       "https://api.phonepe.com/apis/pg/checkout/v2/pay",
       {
         merchantOrderId: orderId,
-        amount: 3900,
+        // amount: 3900,
+        amount:100,
         paymentFlow: {
           type: "PG_CHECKOUT",
           merchantUrls: {
