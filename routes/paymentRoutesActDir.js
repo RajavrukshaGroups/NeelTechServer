@@ -51,7 +51,7 @@ router.post("/create-payment", async (req, res) => {
       {
         merchantOrderId: orderId,
         // amount: 3900,
-        amount:100,
+        amount: 100,
         paymentFlow: {
           type: "PG_CHECKOUT",
           merchantUrls: {
@@ -83,6 +83,13 @@ router.post("/create-payment", async (req, res) => {
 router.get("/verify-payment", async (req, res) => {
   try {
     const { orderId } = req.query;
+
+    // ✅ CHECK DB FIRST (VERY IMPORTANT)
+    const payment = await Payment.findOne({ orderId });
+
+    if (payment?.status === "COMPLETED") {
+      return res.json({ success: true, status: "COMPLETED" });
+    }
 
     // STEP 1: Get token
     const tokenRes = await axios.post(
@@ -121,18 +128,35 @@ router.get("/verify-payment", async (req, res) => {
       },
     );
 
+    // const state = response.data?.state || response.data?.data?.state;
+
+    // console.log("FINAL STATE:", state);
+
+    // if (state === "COMPLETED") {
+    //   return res.json({ success: true, status: "COMPLETED" });
+    // }
+
+    // if (state === "FAILED") {
+    //   return res.json({ success: false, status: "FAILED" });
+    // }
+
+    // return res.json({ success: false, status: "PENDING" });
     const state = response.data?.state || response.data?.data?.state;
 
+    console.log("PHONEPE FULL RESPONSE:", response.data);
     console.log("FINAL STATE:", state);
 
-    if (state === "COMPLETED") {
+    // ✅ HANDLE ALL SUCCESS STATES
+    if (["COMPLETED", "SUCCESS", "PAYMENT_SUCCESS"].includes(state)) {
       return res.json({ success: true, status: "COMPLETED" });
     }
 
-    if (state === "FAILED") {
+    // ❌ HANDLE FAIL STATES
+    if (["FAILED", "DECLINED"].includes(state)) {
       return res.json({ success: false, status: "FAILED" });
     }
 
+    // ⏳ OTHERWISE PENDING
     return res.json({ success: false, status: "PENDING" });
   } catch (err) {
     console.error(err.response?.data || err.message);
