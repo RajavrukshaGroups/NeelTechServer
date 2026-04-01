@@ -3,6 +3,7 @@ dotenv.config(); // ✅ MUST BE FIRST
 const express = require("express");
 const axios = require("axios");
 const Payment = require("../Models/payment");
+const qs = require("qs");
 
 const router = express.Router();
 
@@ -20,8 +21,15 @@ router.post("/create-payment", async (req, res) => {
     // STEP 3: Get token
     const tokenRes = await axios.post(
       // "https://api-preprod.phonepe.com/apis/pg-sandbox/v1/oauth/token",
-      "https://api.phonepe.com/apis/pg/v1/oauth/token",
-      new URLSearchParams({
+      //   "https://api.phonepe.com/apis/pg/v1/oauth/token",
+      "https://api.phonepe.com/apis/identity-manager/v1/oauth/token",
+      //   new URLSearchParams({
+      //     client_id: process.env.PHONE_PE_CLIENT_ID,
+      //     client_version: "1",
+      //     client_secret: process.env.PHONE_PE_CLIENT_SECRET_KEY,
+      //     grant_type: "client_credentials",
+      //   }),
+      qs.stringify({
         client_id: process.env.PHONE_PE_CLIENT_ID,
         client_version: "1",
         client_secret: process.env.PHONE_PE_CLIENT_SECRET_KEY,
@@ -78,13 +86,20 @@ router.get("/verify-payment", async (req, res) => {
     // STEP 1: Get token
     const tokenRes = await axios.post(
       //   "https://api-preprod.phonepe.com/apis/pg-sandbox/v1/oauth/token",
-      "https://api.phonepe.com/apis/pg/v1/oauth/token",
-      new URLSearchParams({
+      //   "https://api.phonepe.com/apis/pg/v1/oauth/token",
+      "https://api.phonepe.com/apis/identity-manager/v1/oauth/token",
+      qs.stringify({
         client_id: process.env.PHONE_PE_CLIENT_ID,
         client_version: "1",
         client_secret: process.env.PHONE_PE_CLIENT_SECRET_KEY,
         grant_type: "client_credentials",
       }),
+      //   new URLSearchParams({
+      //     client_id: process.env.PHONE_PE_CLIENT_ID,
+      //     client_version: "1",
+      //     client_secret: process.env.PHONE_PE_CLIENT_SECRET_KEY,
+      //     grant_type: "client_credentials",
+      //   }),
       {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
