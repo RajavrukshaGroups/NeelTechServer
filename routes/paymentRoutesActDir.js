@@ -58,7 +58,7 @@ router.post("/create-payment", async (req, res) => {
             // redirectUrl:
             //   "http://localhost:3001/active-directory/payment-success",
             redirectUrl:
-              "https://neeltechnologies.com/active-directory/payment-success",
+              "https://neeltechnologies.com/#/active-directory/payment-success",
           },
         },
       },
