@@ -19,7 +19,7 @@ router.post("/create-payment", async (req, res) => {
 
     // STEP 3: Get token
     const tokenRes = await axios.post(
-      //   "https://api-preprod.phonepe.com/apis/pg-sandbox/v1/oauth/token",
+      // "https://api-preprod.phonepe.com/apis/pg-sandbox/v1/oauth/token",
       "https://api.phonepe.com/apis/pg/v1/oauth/token",
       new URLSearchParams({
         client_id: process.env.PHONE_PE_CLIENT_ID,
@@ -38,7 +38,7 @@ router.post("/create-payment", async (req, res) => {
 
     // STEP 4: Create payment
     const response = await axios.post(
-      //   "https://api-preprod.phonepe.com/apis/pg-sandbox/checkout/v2/pay",
+      // "https://api-preprod.phonepe.com/apis/pg-sandbox/checkout/v2/pay",
       "https://api.phonepe.com/apis/pg/checkout/v2/pay",
       {
         merchantOrderId: orderId,
@@ -66,7 +66,7 @@ router.post("/create-payment", async (req, res) => {
       orderId,
     });
   } catch (error) {
-    console.error(error);
+    console.error("🔥 PAYMENT ERROR:", error.response?.data || error.message);
     res.status(500).json({ message: "Payment failed" });
   }
 });
