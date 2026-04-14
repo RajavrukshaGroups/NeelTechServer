@@ -8,6 +8,7 @@ const connectDB = require("./config/db"); // ✅ ADD
 const contactRoutes = require("./routes/routes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const paymentRoutesActDir = require("./routes/paymentRoutesActDir");
+const paymentRoutesPowershell = require("./routes/paymentRoutesPowershell");
 
 const app = express();
 
@@ -37,13 +38,14 @@ app.use(
       }
     },
     credentials: true,
-  })
+  }),
 );
 
 // Routes
 app.use("/api", contactRoutes);
 app.use("/api", paymentRoutes);
 app.use("/api/active-dir", paymentRoutesActDir);
+app.use("/api/powershell", paymentRoutesPowershell);
 
 const PORT = process.env.PORT || 9000;
 
